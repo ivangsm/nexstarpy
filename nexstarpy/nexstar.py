@@ -2,7 +2,13 @@ import serial
 from typing import Tuple, Optional, Union
 import time
 from . import constants
-from . import CommunicationError, InvalidTrackingMode, InvalidSlewRate
+from .exceptions import (
+    CommunicationError,
+    InvalidTrackingMode,
+    InvalidSlewRate,
+    ProtocolError,
+    NexStarError
+)
 
 class NexStar:
     def __init__(self, port: str, timeout: float = constants.CommandTerminator.TIMEOUT):

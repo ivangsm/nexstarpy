@@ -88,10 +88,10 @@ telescope.slew_fixed(
 ### Time & Location
 
 ```python
-# Set location (Los Angeles, CA)
+# Set location (Guadalajara, JAL, México)
 telescope.set_location(
-    lat=(34, 3, 17, constants.Hemisphere.NORTH),
-    lon=(118, 15, 35, constants.Hemisphere.WEST)
+    lat=(20, 40, 23, constants.Hemisphere.NORTH),    # 20°40'23" N
+    lon=(103, 20, 58, constants.Hemisphere.WEST)     # 103°20'58" W
 )
 
 # Set time (24h format, UTC-8 with DST)

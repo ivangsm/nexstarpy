@@ -124,3 +124,58 @@ def test_gps_status_check(mock_serial):
     # Not linked
     mock_serial.return_value.read.side_effect = [b'\x00', b'#']
     assert NexStar(port="COM1").is_gps_linked() is False
+
+def test_degrees_to_hex_conversion():
+    """Test degree to hexadecimal conversion"""
+    # Standard precision
+    assert NexStar._degrees_to_hex(0.0, False) == "0000"
+    assert NexStar._degrees_to_hex(359.9787, False) == "FFFC"
+    
+    # Precise mode (using example from protocol docs)
+    assert NexStar._degrees_to_hex(26.2520, True) == "0012AB07"
+
+def test_get_tracking_mode(mock_serial):
+    """Test tracking mode retrieval"""
+    mock_serial.return_value.read.side_effect = [b'2', b'#']  # EQ North
+    telescope = NexStar(port="COM1")
+    assert telescope.get_tracking_mode() == TrackingMode.EQ_NORTH
+
+def test_fixed_rate_slew(mock_serial):
+    """Test fixed rate slewing commands"""
+    telescope = NexStar(port="COM1")
+    
+    # Test positive AZM slew
+    telescope.slew_fixed(Axis.AZM_RA, SlewDirection.POSITIVE_FIXED, 5)
+    expected_cmd = bytes([0x50, 0x02, 0x10, 0x24, 0x05, 0x00, 0x00, 0x00])
+    mock_serial.return_value.write.assert_called_with(expected_cmd)
+
+def test_set_location(mock_serial):
+    """Test location configuration"""
+    telescope = NexStar(port="COM1")
+    telescope.set_location(
+        lat=(19, 25, 57, Hemisphere.NORTH),
+        lon=(99, 7, 59, Hemisphere.WEST)
+    )
+    expected_cmd = bytes([
+        0x57, 19, 25, 57, 0, 99, 7, 59, 1
+    ])
+    mock_serial.return_value.write.assert_called_with(expected_cmd)
+
+def test_set_time(mock_serial):
+    """Test time configuration"""
+    telescope = NexStar(port="COM1")
+    telescope.set_time((15, 30, 0, 4, 6, 5, 248, 1))
+    expected_cmd = bytes([0x48, 15, 30, 0, 4, 6, 5, 248, 1])
+    mock_serial.return_value.write.assert_called_with(expected_cmd)
+
+def test_cancel_goto(mock_serial):
+    """Test GOTO cancellation"""
+    telescope = NexStar(port="COM1")
+    telescope.cancel_goto()
+    mock_serial.return_value.write.assert_called_with(b'M')
+
+def test_close(mock_serial):
+    """Test serial port closure"""
+    telescope = NexStar(port="COM1")
+    telescope.close()
+    mock_serial.return_value.close.assert_called_once()

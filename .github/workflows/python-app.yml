@@ -44,6 +44,7 @@ jobs:
         name: python-package-distributions
         path: dist/
   pypi-publish:
+    needs: build
     name: Upload release to PyPI
     runs-on: ubuntu-latest
     environment:
